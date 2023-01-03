@@ -140,7 +140,7 @@ function ordenarListaBi (listados, i) {
 	function ordenarListaSort(a, b) {
 		return a[i] - b[i];
 	}
-
+ 
 	const lista2 = listados.sort(ordenarListaSort);
 	return lista2
 }
