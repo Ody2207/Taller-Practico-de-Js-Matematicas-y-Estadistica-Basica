@@ -15,7 +15,7 @@ function medianaPersona (nombrePersona) {
 
     const medianaSalarios = PlatziMath.calcularMediana(salarios)
 
-    console.log(medianaSalarios);
+    // console.log(medianaSalarios);
     return medianaSalarios;
 };
 
@@ -44,8 +44,22 @@ function proyeccionPorPersona (nombrePersona) {
 };
 
 const empresas = {};
-for (persona of salarios) {
-	for (trabajo of persona.trabajos) {
+// for (persona of salarios) {
+// 	for (trabajo of persona.trabajos) {
+// 		if (!empresas[trabajo.empresa]) {
+// 			empresas[trabajo.empresa] = {};
+// 		};
+
+// 		if (!empresas[trabajo.empresa][trabajo.year]) {
+// 			empresas[trabajo.empresa][trabajo.year] = [];
+// 		};
+
+// 		empresas[trabajo.empresa][trabajo.year].push(trabajo.salario);
+// 	};
+// };
+
+salarios.forEach(persona => {
+	persona.trabajos.forEach(trabajo => {
 		if (!empresas[trabajo.empresa]) {
 			empresas[trabajo.empresa] = {};
 		};
@@ -55,7 +69,65 @@ for (persona of salarios) {
 		};
 
 		empresas[trabajo.empresa][trabajo.year].push(trabajo.salario);
-	};
-};
+	});
+});
 
 console.log({empresas})
+
+function medianaEmpresa (nombre, year) {
+	if (!empresas[nombre]) {
+		console.warn('La empresa no existe');
+	} else if (!empresas[nombre][year]) {
+		console.warn('La empresa no dio salairio ese año');
+	} else {
+		return PlatziMath.calcularMediana(empresas[nombre][year])
+	}
+};
+
+function proyeccionPorEmpresa (nombre) {
+    if (!empresas[nombre]) {
+		console.warn('La empresa no existe');
+	} else {
+        const empresaYear = Object.keys(empresas[nombre]);
+        const listaMedianaYears = empresaYear.map((year) => {
+        return medianaEmpresa(nombre, year);
+        });
+    
+    let procentajesCrecimiento  = [];
+
+    for (let i = 1; i < listaMedianaYears.length; i++) {
+        const salarioActual = listaMedianaYears[i];
+        const salarioPasado = listaMedianaYears[i - 1];
+        const crecimiento = salarioActual - salarioPasado;
+        const procentajeCrecimiento = crecimiento / salarioPasado;        
+        procentajesCrecimiento.push(procentajeCrecimiento);
+    }
+
+    const medianaPorcentajeCrecimiento = PlatziMath.calcularMediana(procentajesCrecimiento);
+
+    const ultimaMediana = listaMedianaYears[listaMedianaYears.length - 1];
+    const aumento = ultimaMediana * medianaPorcentajeCrecimiento;
+    const nuevaMediana = ultimaMediana + aumento;
+
+    return nuevaMediana;
+    };
+};
+
+// Analisis general 
+
+function medianaGeneral() {
+    const listaMedianas = salarios.map(persona => medianaPersona(persona.name));
+    const mediana = PlatziMath.calcularMediana(listaMedianas);
+    return mediana;
+}
+
+function medianaTop10() {
+    const listaMedianas = salarios.map(persona => medianaPersona(persona.name));
+    const medianasOrdenadas = PlatziMath.ordenarLista(listaMedianas);
+    const cantidad = listaMedianas.length / 10;
+    const limite = listaMedianas.length - cantidad; 
+
+    const top10 = medianasOrdenadas.slice(limite, medianasOrdenadas.length);
+    const medianaTop10 = PlatziMath.calcularMediana(top10);
+    return medianaTop10;
+}
